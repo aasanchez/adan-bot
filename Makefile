@@ -143,10 +143,10 @@ lint: ## Lint Go code
 	gofmt -d -e -s $(goFiles)
 
 ca: ## Run code analysis
-	golangci-lint run
+	golangci-lint --config golangci.yml run
 
 ca-fast: ## Run code analysis with fast mode
-	golangci-lint run --fast
+	golangci-lint --config golangci.yml run --fast
 
 ##@ Fuzzing
 .PHONY: fuzz
