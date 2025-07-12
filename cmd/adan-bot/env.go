@@ -19,7 +19,8 @@ func Getenv(key, def string) string {
 }
 
 func init() {
-	if err := godotenv.Load(); err != nil {
+	err := godotenv.Load()
+	if err != nil {
 		log.Fatalf("Cannot load envfile: %v", err)
 	}
 }
