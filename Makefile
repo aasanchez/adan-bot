@@ -69,7 +69,6 @@ dev-env: ## Run development environment in Docker
 		$(DOCKER_IMAGE):dev
 
 ##@ Testing
-
 .PHONY: test test-race
 COVERAGE_FILE ?= coverage-dev.txt
 TARGET_FUNC ?= .
@@ -81,18 +80,10 @@ ifneq "$(notdir $(TARGET_PKG))" "..."
 endif
 
 test: ## Run tests
-	$(GO) test -v \
-		-run "$(TARGET_FUNC)" \
-		-coverprofile "$(COVERAGE_FILE)" \
-		$(profileFlags) \
-		"$(TARGET_PKG)"
+	@$(GO) test -v -run "$(TARGET_FUNC)" -coverprofile "$(COVERAGE_FILE)" $(profileFlags) "$(TARGET_PKG)"
 
 test-race: ## Run tests with race detector
-	$(GO) test -v -race \
-		-run "$(TARGET_FUNC)" \
-		-coverprofile "$(COVERAGE_FILE)" \
-		$(profileFlags) \
-		"$(TARGET_PKG)"
+	@$(GO) test -v -race -run "$(TARGET_FUNC)" -coverprofile "$(COVERAGE_FILE)" $(profileFlags) "$(TARGET_PKG)"
 
 ##@ Benchmarking
 .PHONY: benchmark benchmark-check benchmark-web
@@ -101,10 +92,7 @@ BENCHMARK_FILE ?= benchmarks-dev.txt
 benchmarkWebFile := $(shell mktemp -u)-$(PROJECT).html
 
 benchmark: ## Run benchmarks
-	$(GO) test -v -run none \
-		-bench "$(TARGET_FUNC)" -benchmem -count $(BENCHMARK_COUNT) \
-		$(profileFlags) \
-		"$(TARGET_PKG)" | tee "$(BENCHMARK_FILE)"
+	$(GO) test -v -run none -bench "$(TARGET_FUNC)" -benchmem -count $(BENCHMARK_COUNT) $(profileFlags) "$(TARGET_PKG)" | tee "$(BENCHMARK_FILE)"
 
 benchmark-check: benchmarks.txt $(BENCHMARK_FILE) ## Check benchmark results
 	benchstat "$<" "$(BENCHMARK_FILE)"
