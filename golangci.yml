@@ -3,39 +3,19 @@ linters:
   default: all
   disable:
     - depguard
-    - gochecknoglobals
-    - copyloopvar
-    - intrange
-    - gochecknoinits
-    - gocyclo
-    - godox
-    - ireturn
-    - nlreturn
-    - nonamedreturns
-    - unparam
-    - unused
+    - lll
     - varnamelen
     - wsl
   settings:
     revive:
       enable-all-rules: true
       rules:
-        - name: var-naming
-          severity: warning
-          disabled: false
-          arguments:
-            - ["ID"] # Allow ID-style names
-        - name: line-length-limit
-          disabled: true
         - name: add-constant
           disabled: true
         - name: exported
           disabled: true
         - name: package-comments
           disabled: true
-        - name: cognitive-complexity
-          disabled: true
-
 output:
   formats:
     text:
