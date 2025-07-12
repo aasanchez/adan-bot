@@ -177,3 +177,8 @@ tags
 ## Project Specific
 dist/
 coverage-dev.txt
+benchmarks-dev.txt
+coverage.txt
+.env
+.env.*
+tmp/*
