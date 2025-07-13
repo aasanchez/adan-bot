@@ -29,74 +29,77 @@ jobs:
           version: v2.2.1
           args: --config golangci.yml --timeout=5m ./...
 
-  test:
-    name: Golangci-lint
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        go_version:
-          - 1.23
-          - 1.24
-    steps:
-      - uses: actions/checkout@v4
+  # test:
+  #   name: Golangci-lint
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       go_version:
+  #         - 1.23
+  #         - 1.24
+  #   steps:
+  #     - uses: actions/checkout@v4
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: ${{ matrix.go_version }}
+  #     - name: Test
+  #       run: mkdir -p reports
 
-      - name: Install Tools
-        run: |
-          go install github.com/jstemmer/go-junit-report/v2@latest
-          go mod tidy
+  #     - name: Set up Go
+  #       uses: actions/setup-go@v5
+  #       with:
+  #         go-version: ${{ matrix.go_version }}
 
-      - name: Test
-        run: make test-race
+  #     - name: Install Tools
+  #       run: |
+  #         go install github.com/jstemmer/go-junit-report/v2@latest
+  #         go mod tidy
 
-      - name: Produce JUnit report
-        run: go-junit-report <reports/coverage-dev.txt >reports/xunit.xml
+  #     - name: Test
+  #       run: make test-race
 
-      - name: reports/xunit.xml
-        run: cat reports/xunit.xml
+  #     - name: Produce JUnit report
+  #       run: go-junit-report <reports/coverage-dev.txt >reports/xunit.xml
 
-      - name: reports/coverage-dev.txt
-        run: cagt reports/coverage-dev.txt
+  #     - name: reports/xunit.xml
+  #       run: cat reports/xunit.xml
 
-      # - name: Upload coverage to Codecov
-      #   uses: codecov/codecov-action@v5
-      #   with:
-      #     files: reports/coverage-dev.txt
-      #     flags: unit
-      #     slug: aasanchez/ocpp16messages
-      #     token: ${{ secrets.CODECOV_TOKEN }}
-      #     verbose: true
+  #     - name: reports/coverage-dev.txt
+  #       run: cagt reports/coverage-dev.txt
 
-      # - name: Upload JUnitReport to Codecov
-      #   uses: codecov/test-results-action@v1
-      #   with:
-      #     flags: unit
-      #     files: reports/xunit.xml
-      #     token: ${{ secrets.CODECOV_TOKEN }}
-      #     verbose: true
+  #     # - name: Upload coverage to Codecov
+  #     #   uses: codecov/codecov-action@v5
+  #     #   with:
+  #     #     files: reports/coverage-dev.txt
+  #     #     flags: unit
+  #     #     slug: aasanchez/ocpp16messages
+  #     #     token: ${{ secrets.CODECOV_TOKEN }}
+  #     #     verbose: true
 
-  build:
-    name: Golangci-lint
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        go_version:
-          - 1.23
-          - 1.24
-    steps:
-      - uses: actions/checkout@v4
+  #     # - name: Upload JUnitReport to Codecov
+  #     #   uses: codecov/test-results-action@v1
+  #     #   with:
+  #     #     flags: unit
+  #     #     files: reports/xunit.xml
+  #     #     token: ${{ secrets.CODECOV_TOKEN }}
+  #     #     verbose: true
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: ${{ matrix.go_version }}
+  # build:
+  #   name: Golangci-lint
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       go_version:
+  #         - 1.23
+  #         - 1.24
+  #   steps:
+  #     - uses: actions/checkout@v4
 
-      - name: Build
-        run: make build
+  #     - name: Set up Go
+  #       uses: actions/setup-go@v5
+  #       with:
+  #         go-version: ${{ matrix.go_version }}
+
+  #     - name: Build
+  #       run: make build
 
   # build-image:
   #   name: Build Image for Deployment

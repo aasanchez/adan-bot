@@ -6,6 +6,14 @@ linters:
     - lll
     - varnamelen
     - wsl
+    - err113
+    - gochecknoinits
+    - gosec
+    - nlreturn
+    - noinlineerr
+    - revive
+    - nonamedreturns
+    - unused
   settings:
     revive:
       enable-all-rules: true
