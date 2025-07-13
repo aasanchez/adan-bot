@@ -70,7 +70,7 @@ dev-env: ## Run development environment in Docker
 
 ##@ Testing
 .PHONY: test test-race
-COVERAGE_FILE ?= coverage-dev.txt
+COVERAGE_FILE ?= reports/coverage-dev.txt
 TARGET_FUNC ?= .
 TARGET_PKG ?= ./...
 
