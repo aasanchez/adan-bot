@@ -27,7 +27,7 @@ goFilesTest := $(shell $(GO) list -f "{{ range .TestGoFiles }}{{ $$.Dir }}/{{ . 
 all: build ## Build the project
 
 build: ## Build the project
-	$(GO) build -ldflags="-s -w" -trimpath -o ./dist/ ./...
+	cd cmd/adan-bot && $(GO) build -ldflags="-s -w" -trimpath -o ./dist/ ./...
 
 clean: ## Clean build artifacts
 	rm -rf dist/
@@ -163,6 +163,13 @@ ci-race: build test-race lint ca ## Run continuous integration checks with race 
 ##@ Documentation
 .PHONY: doc
 doc: ## Run Go documentation server
-	@echo "Go to http://localhost:$(GODOC_PORT)/pkg/$(module)/"
-	godoc -http ":$(GODOC_PORT)" -play
-	#GOPROXY=$(shell go env GOPROXY) pkgsite -http ":$(GODOC_PORT)" -cache -proxy
+	@echo "Stopping any running pkgsite processes..."
+	@pkill pkgsite || true
+	@echo "Cleaning Go module cache..."
+	@go clean -modcache && rm -rf $$GOPATH/pkg
+	@echo "Tidying up Go modules..."
+	@go mod tidy
+	@echo "Launching pkgsite at http://localhost:8080 ..."
+	@nohup pkgsite > /dev/null 2>&1 &
+	@sleep 2
+	@open -a "Google Chrome" http://localhost:8080/$(module)

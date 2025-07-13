@@ -86,24 +86,24 @@ jobs:
           include-hidden-files: true
           path: reports/
 
-  # build:
-  #   name: Golangci-lint
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     matrix:
-  #       go_version:
-  #         - 1.23
-  #         - 1.24
-  #   steps:
-  #     - uses: actions/checkout@v4
+  build:
+    name: Golangci-lint
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go_version:
+          - 1.23
+          - 1.24
+    steps:
+      - uses: actions/checkout@v4
 
-  #     - name: Set up Go
-  #       uses: actions/setup-go@v5
-  #       with:
-  #         go-version: ${{ matrix.go_version }}
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go_version }}
 
-  #     - name: Build
-  #       run: make build
+      - name: Build
+        run: make build
 
   # build-image:
   #   name: Build Image for Deployment
