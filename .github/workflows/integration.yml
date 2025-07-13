@@ -32,7 +32,7 @@ jobs:
           path: reports/
 
   test:
-    name: Golangci-lint
+    name: Golangci-lint for ${{ github.run_number }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -60,7 +60,7 @@ jobs:
         run: cat reports/xunit.xml
 
       - name: reports/coverage-dev.txt
-        run: cagt reports/coverage-dev.txt
+        run: cat reports/coverage-dev.txt
 
       # - name: Upload coverage to Codecov
       #   uses: codecov/codecov-action@v5
