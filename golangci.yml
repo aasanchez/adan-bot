@@ -6,6 +6,7 @@ linters:
     - depguard
     - err113
     - errcheck
+    - funlen
     - gochecknoinits
     - gocognit
     - gosec
