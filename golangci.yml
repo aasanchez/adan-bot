@@ -1,0 +1,39 @@
+version: "2"
+linters:
+  default: all
+  disable:
+    - cyclop
+    - depguard
+    - err113
+    - errcheck
+    - funlen
+    - gochecknoinits
+    - gocognit
+    - gosec
+    - lll
+    - misspell
+    - nestif
+    - nlreturn
+    - noinlineerr
+    - nonamedreturns
+    - revive
+    - unused
+    - varnamelen
+    - wsl
+  settings:
+    revive:
+      enable-all-rules: true
+      rules:
+        - name: add-constant
+          disabled: true
+        - name: exported
+          disabled: true
+        - name: package-comments
+          disabled: true
+output:
+  formats:
+    text:
+      path: reports/golangci-lint.txt
+      print-linter-name: true
+      print-issued-lines: true
+      colors: false

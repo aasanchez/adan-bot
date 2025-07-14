@@ -14,7 +14,6 @@ var (
 	ErrMissingToken = errors.New("missing Telegram API token")
 )
 
-//nolint:cyclop,gocognit
 func Main() error {
 	APITOKEN := strings.Trim(Getenv("TELEGRAM_API_TOKEN", ""), `"`)
 	if APITOKEN == "" {
@@ -36,21 +35,17 @@ func Main() error {
 	updates := bot.GetUpdatesChan(u)
 
 	for update := range updates {
-		if update.Message == nil { // ignore any non-Message updates
+		if update.Message == nil {
 			continue
 		}
 
-		if !update.Message.IsCommand() { // ignore any non-command Messages
+		if !update.Message.IsCommand() {
 			continue
 		}
 
 		chat := update.Message.Chat
-
-		// Create a new MessageConfig. We don't have text yet,
-		// so we leave it empty.
 		msg := tgbotapi.NewMessage(chat.ID, "")
 
-		// Extract the command from the Message.
 		switch update.Message.Command() {
 		case "help":
 			msg.Text = "/hola and /status."
@@ -60,7 +55,6 @@ func Main() error {
 			msg.Text += "arauca vibrador, soy hermano de la espuma de las garzas de "
 			msg.Text += "las rosas y del sol.>> "
 		case "status":
-			//nolint:misspell
 			msg.Text = "De momento todo esta bien"
 		default:
 			msg.Text = "I don't know that command"

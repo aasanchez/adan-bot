@@ -11,7 +11,6 @@ import (
 	"strings"
 )
 
-//nolint:cyclop,gocognit,nestif
 func Profile(fn func() error) (err error) {
 	if os.Getenv("TRACE") == "1" {
 		var fname string
