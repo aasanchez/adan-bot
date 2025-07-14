@@ -87,7 +87,7 @@ jobs:
           path: reports/
 
   build:
-    name: Golangci-lint
+    name: Build
     runs-on: ubuntu-latest
     strategy:
       matrix:
