@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path/filepath"
+	"runtime"
 	"runtime/pprof"
 	"runtime/trace"
 	"strings"
@@ -13,17 +13,59 @@ import (
 
 func Profile(fn func() error) (err error) {
 	if os.Getenv("TRACE") == "1" {
-		err = startTraceProfiling()
-		if err != nil {
-			return err
+		var fname string
+
+		if v := os.Getenv("TRACE_FILE"); v != "" {
+			fname = v
+		} else {
+			fname = "trace.out"
 		}
+
+		f, err := os.Create(fname)
+		if err != nil {
+			return fmt.Errorf("cannot create trace execution file: %w", err)
+		}
+
+		defer func() {
+			if errC := f.Close(); errC != nil {
+				errC = fmt.Errorf("cannot close trace execution file: %w", errC)
+				err = errors.Join(err, errC)
+			}
+		}()
+
+		if err := trace.Start(f); err != nil {
+			return fmt.Errorf("cannot start execution tracing: %w", err)
+		}
+
+		defer trace.Stop()
 	}
 
 	if os.Getenv("PROFILE_CPU") == "1" {
-		err = startCPUProfiling()
-		if err != nil {
-			return err
+		var fname string
+
+		if v := os.Getenv("PROFILE_CPU_FILE"); v != "" {
+			fname = v
+		} else {
+			fname = "cpu.pprof"
 		}
+
+		f, err := os.Create(fname)
+		if err != nil {
+			return fmt.Errorf("cannot create cpu profile file: %w", err)
+		}
+
+		defer func() {
+			if errC := f.Close(); errC != nil {
+				errC = fmt.Errorf("cannot close cpu profile file: %w", errC)
+				err = errors.Join(err, errC)
+			}
+		}()
+
+		if err := pprof.StartCPUProfile(f); err != nil {
+			return fmt.Errorf("cannot profile cpu usage: %w", err)
+		}
+
+		defer pprof.StopCPUProfile()
 	}
 
 	if err := fn(); err != nil {
@@ -47,92 +89,9 @@ func Profile(fn func() error) (err error) {
 		}
 
 		if err := writeProfileToFile(fname, name); err != nil {
-			return fmt.Errorf("%w: %s", errCannotWriteProfile, name)
+			return fmt.Errorf("cannot write %s profile: %w", name, err)
 		}
 	}
-
-	return nil
-}
-
-var (
-	errInvalidProfile        = errors.New("invalid profile given")
-	errCannotCreateTraceFile = errors.New("cannot create trace execution file")
-	errCannotStartTrace      = errors.New("cannot start execution tracing")
-	errCannotCreateCPUFile   = errors.New("cannot create cpu profile file")
-	errCannotProfileCPU      = errors.New("cannot profile cpu usage")
-	errCannotWriteProfile    = errors.New("cannot write profile")
-	errCannotCloseFile       = errors.New("cannot close file")
-	errCannotCreateFile      = errors.New("cannot create file")
-	errUnsafeFilename        = errors.New("unsafe filename")
-)
-
-func startTraceProfiling() (err error) {
-	var fname string
-
-	if v := os.Getenv("TRACE_FILE"); v != "" {
-		fname = v
-	} else {
-		fname = "trace.out"
-	}
-
-	if !isSafeFilename(fname) {
-		return fmt.Errorf("%w: %w", errUnsafeFilename, errors.New(fname))
-	}
-
-	//nolint:gosec // G304: The filename `fname` is checked for safety.
-	f, err := os.Create(filepath.Join(".", fname)) //nolint:gosec
-	if err != nil {
-		return fmt.Errorf("%w: %w", errCannotCreateTraceFile, err)
-	}
-
-	defer func() {
-		if errC := f.Close(); errC != nil {
-			errC = fmt.Errorf("%w: %w", errCannotCloseFile, errC)
-			err = errors.Join(err, errC)
-		}
-	}()
-
-	err = trace.Start(f)
-	if err != nil {
-		return fmt.Errorf("%w: %w", errCannotStartTrace, err)
-	}
-
-	defer trace.Stop()
-
-	return nil
-}
-
-func startCPUProfiling() (err error) {
-	var fname string
-
-	if v := os.Getenv("PROFILE_CPU_FILE"); v != "" {
-		fname = v
-	} else {
-		fname = "cpu.pprof"
-	}
-
-	if !isSafeFilename(fname) {
-		return fmt.Errorf("%w: %w", errUnsafeFilename, errors.New(fname))
-	}
-
-	f, err := os.Create(fname)
-	if err != nil {
-		return fmt.Errorf("%w: %w", errCannotCreateCPUFile, err)
-	}
-
-	defer func() {
-		if errC := f.Close(); errC != nil {
-			errC = fmt.Errorf("%w: %w", errCannotCloseFile, errC)
-			err = errors.Join(err, errC)
-		}
-	}()
-
-	err = pprof.StartCPUProfile(f)
-	if err != nil {
-		return fmt.Errorf("%w: %w", errCannotProfileCPU, err)
-	}
-
-	defer pprof.StopCPUProfile()
 
 	return nil
 }
@@ -140,35 +99,35 @@ func startCPUProfiling() (err error) {
 func writeProfile(w io.Writer, name string) error {
 	prof := pprof.Lookup(name)
 	if prof == nil {
-		return errInvalidProfile
+		return errors.New("invalid profile given")
+	}
+
+	if name == "allocs" || name == "heap" {
+		runtime.GC()
 	}
 
 	if err := prof.WriteTo(w, 0); err != nil {
-		return fmt.Errorf("%w: %w", errCannotWriteProfile, err)
+		return fmt.Errorf("cannot write: %w", err)
 	}
 
 	return nil
 }
 
 func writeProfileToFile(fname, name string) error {
-	if !isSafeFilename(fname) {
-		return fmt.Errorf("%w: %w", errUnsafeFilename, errors.New(fname))
-	}
-
 	f, err := os.Create(fname)
 	if err != nil {
-		return fmt.Errorf("%w: %w", errCannotCreateFile, err)
+		return fmt.Errorf("cannot create file: %w", err)
 	}
 
+	defer f.Close()
+
 	if err := writeProfile(f, name); err != nil {
-		_ = f.Close() // Close the file even if writeProfile fails
 		return err
 	}
 
-	return fmt.Errorf("%w: %w", errCannotCloseFile, f.Close())
-}
+	if err := f.Close(); err != nil {
+		return fmt.Errorf("cannot close file: %w", err)
+	}
 
-func isSafeFilename(filename string) bool {
-	cleaned := filepath.Clean(filename)
-	return !strings.ContainsAny(cleaned, string(os.PathSeparator)) && !strings.HasPrefix(cleaned, "..") && !filepath.IsAbs(cleaned) && cleaned != "" && cleaned != "."
+	return nil
 }
