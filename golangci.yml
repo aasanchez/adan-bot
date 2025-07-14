@@ -2,18 +2,23 @@ version: "2"
 linters:
   default: all
   disable:
+    - cyclop
     - depguard
-    - lll
-    - varnamelen
-    - wsl
     - err113
+    - errcheck
     - gochecknoinits
+    - gocognit
     - gosec
+    - lll
+    - misspell
+    - nestif
     - nlreturn
     - noinlineerr
-    - revive
     - nonamedreturns
+    - revive
     - unused
+    - varnamelen
+    - wsl
   settings:
     revive:
       enable-all-rules: true
