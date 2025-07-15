@@ -95,8 +95,8 @@ jobs:
     strategy:
       matrix:
         go_version:
-          - 1.23
           - 1.24
+          - '1.25-rc2'
     steps:
       - uses: actions/checkout@v4
 
@@ -104,6 +104,7 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: ${{ matrix.go_version }}
+          check-latest: true
 
       - name: Build
         run: make build
